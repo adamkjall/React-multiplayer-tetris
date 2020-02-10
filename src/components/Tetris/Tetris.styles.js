@@ -18,6 +18,7 @@ export const StyledTetrisWrapper = styled.div`
 `;
 
 export const StyledTetris = styled.div`
+  position: relative;
   display: flex;
   justify-content: center;
   padding: 2.5rem;

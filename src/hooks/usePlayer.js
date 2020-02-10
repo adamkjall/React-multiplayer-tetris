@@ -3,14 +3,15 @@ import { useState, useCallback } from "react";
 import { TETROMINOS, randomTetromino } from "../tetrominos";
 import { STAGE_WIDTH, checkCollision } from "../gameHelpers";
 
-export const usePlayer = () => {
-  const initialState = {
-    pos: { x: STAGE_WIDTH / 2 - 2, y: 0 },
-    tetromino: TETROMINOS[0].shape,
-    collided: false
-  };
+const initialState = tetromino => ({
+  pos: { x: STAGE_WIDTH / 2 - 2, y: 0 },
+  tetromino,
+  collided: false
+});
 
-  const [player, setPlayer] = useState(initialState);
+export const usePlayer = () => {
+  const tetromino = TETROMINOS[0].shape;
+  const [player, setPlayer] = useState(initialState(tetromino));
 
   const rotate = (tetromino, dir) => {
     // Make the rows to become cols (transpose)
@@ -47,17 +48,17 @@ export const usePlayer = () => {
   const updatePlayerPos = ({ x, y, collided }) => {
     setPlayer(prev => ({
       ...prev,
-      pos: { x: prev.pos.x += x, y: prev.pos.y += y },
+      pos: { x: (prev.pos.x += x), y: (prev.pos.y += y) },
       collided
     }));
   };
 
   const resetPlayer = useCallback(() => {
-    setPlayer({
-      ...initialState,
-      tetromino: randomTetromino().shape
-    });
-  }, [initialState]);
+    const tetromino = randomTetromino().shape;
+    setPlayer(initialState(tetromino));
+    console.log("initState: ", initialState);
+    console.log("Player: ", player);
+  }, [player]);
 
   return [player, updatePlayerPos, resetPlayer, playerRotate];
 };

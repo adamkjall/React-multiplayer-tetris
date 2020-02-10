@@ -11,4 +11,5 @@ export const StyledStage = styled.div`
   border: 2px solid #333;
   width: 500px;
   background-color: rgb(22, 22, 22);
+  filter: brightness(${props => props.gameOver ? 50 : 100}%);
 `;

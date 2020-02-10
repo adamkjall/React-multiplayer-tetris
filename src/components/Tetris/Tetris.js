@@ -9,9 +9,10 @@ import { useInterval } from "../../hooks/useInterval";
 import { useGameStatus } from "../../hooks/useGameStatus";
 
 // Components
-import Stage from "../Stage/Stage.js";
-import Display from "../Display/Display.js";
-import StartButton from "../StartButton/StartButton.js";
+import Stage from "../Stage/Stage";
+import Display from "../Display/Display";
+import StartButton from "../StartButton/StartButton";
+import Highscore from "../Highscore/Highscore";
 
 // Styled components
 import { StyledTetrisWrapper, StyledTetris } from "./Tetris.styles";
@@ -33,10 +34,10 @@ const Tetris = () => {
     setStage(createStage());
     setDropTime(gameSpeed);
     resetPlayer();
-    setGameOver(false);
     setScore(0);
     setLevel(0);
     setRows(0);
+    setGameOver(false);
   };
 
   const dropPlayer = () => {
@@ -46,7 +47,7 @@ const Tetris = () => {
 
   const drop = () => {
     // Increase level when player has cleared 10 rows
-    if (rows > (level + 1) * 10) {
+    if (rows > (level + 1) * 5) {
       setLevel(prev => prev + 1);
       // also increase speed
       setGameSpeed(startSpeed / (level + 1) + 100);
@@ -56,7 +57,6 @@ const Tetris = () => {
     if (!checkCollision(player, stage, { x: 0, y: 1 })) {
       updatePlayerPos({ x: 0, y: 1, collided: false });
     } else {
-      console.log("hello");
       updatePlayerPos({ x: 0, y: 0, collided: true });
 
       // Game over
@@ -104,7 +104,7 @@ const Tetris = () => {
     drop();
   }, dropTime);
 
-  console.log("re-render");
+  // console.log("re-render");
   return (
     <StyledTetrisWrapper
       role="button"
@@ -113,16 +113,19 @@ const Tetris = () => {
       onKeyUp={keyUp}
     >
       <StyledTetris>
-        <Stage stage={stage} />
+        <aside>
+          <Highscore gameOver={gameOver} />
+        </aside>
+        <Stage stage={stage} gameOver={gameOver} />
         <aside>
           {gameOver ? (
             <Display gameOver={gameOver} text="Game Over" />
           ) : (
-            <div>
+            <React.Fragment>
               <Display text={"Score: " + score} />
               <Display text={"Rows: " + rows} />
               <Display text={"Level: " + level} />
-            </div>
+            </React.Fragment>
           )}
           <StartButton clickHandle={startGame} />
         </aside>

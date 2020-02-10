@@ -9,7 +9,7 @@ export const useStage = (player, resetPlayer) => {
   useEffect(() => {
     setRowsCleared(0);
 
-    const sweepRows = newStage => (
+    const sweepRows = newStage =>
       newStage.reduce((acc, row) => {
         // if full row
         if (row.findIndex(cell => cell[0] === 0) === -1) {
@@ -19,8 +19,7 @@ export const useStage = (player, resetPlayer) => {
         }
         acc.push(row);
         return acc;
-      }, [])
-    )
+      }, []);
 
     const updateStage = prevStage => {
       // First flush the stage
@@ -49,7 +48,13 @@ export const useStage = (player, resetPlayer) => {
     };
 
     setStage(prev => updateStage(prev));
-  }, [player]);
+  }, [
+    player.collided,
+    player.pos.x,
+    player.pos.y,
+    player.tetromino,
+    resetPlayer
+  ]);
 
   return [stage, setStage, rowsCleared];
 };
