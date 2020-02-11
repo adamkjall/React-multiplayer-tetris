@@ -1,6 +1,6 @@
 import React from "react";
 
-import Cell from "../Cell/Cell.js";
+import Cell from "../Cell/Cell";
 
 import { StyledStage } from "./Stage.styles";
 

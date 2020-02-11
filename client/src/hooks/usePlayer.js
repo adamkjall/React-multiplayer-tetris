@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 import { TETROMINOS, randomTetromino } from "../tetrominos";
 import { STAGE_WIDTH, checkCollision } from "../gameHelpers";

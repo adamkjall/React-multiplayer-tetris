@@ -18,7 +18,7 @@ import HighscoreModal from "../HighscoreModal/HighscoreModal";
 // Styled components
 import { StyledTetrisWrapper, StyledTetris } from "./Tetris.styles";
 
-const Tetris = () => {
+const Tetris = ({ isLocalTetris }) => {
   const startSpeed = 600;
   const [gameSpeed, setGameSpeed] = useState(startSpeed);
   const [dropTime, setDropTime] = useState(null);
@@ -44,7 +44,8 @@ const Tetris = () => {
   };
   
   const dropPlayer = () => {
-    
+    setSpeedDrop(true);
+    setDropTime(startSpeed * 0.08)
   };
 
   const drop = () => {
@@ -76,7 +77,7 @@ const Tetris = () => {
 
   const keyUp = e => {
     e.preventDefault();
-    if (!gameOver) {
+    if (isLocalTetris && !gameOver) {
       if (e.keyCode === 32) {
         setSpeedDrop(false);
         setDropTime(gameSpeed)
@@ -92,14 +93,13 @@ const Tetris = () => {
   
   const move = e => {
     e.preventDefault();
-    if (!gameOver) {
+    if (isLocalTetris && !gameOver) {
       if (e.keyCode === 37) {
         movePlayerHorizontal(-1);
       } else if (e.keyCode === 39) {
         movePlayerHorizontal(1);
       } else if (e.keyCode === 32 && !speedDrop) {
-        setSpeedDrop(true);
-        setDropTime(startSpeed * 0.08)
+        dropPlayer();
       } else if (e.keyCode === 38) {
         playerRotate(stage, 1);
       } else if (e.keyCode === 40) {

@@ -5,6 +5,7 @@ import bgImage from "../../assets/img/bg.png";
 export const StyledTetrisWrapper = styled.div`
   width: 100vw;
   height: 100vh;
+  outline: none;
   /* background: url(${bgImage}) #000; */
   /* background: 
     radial-gradient(100% 225% at 0% 0%, #DE3E3E 0%, #17115C 100%),
