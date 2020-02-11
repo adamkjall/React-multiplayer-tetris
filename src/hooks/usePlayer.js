@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 
 import { TETROMINOS, randomTetromino } from "../tetrominos";
 import { STAGE_WIDTH, checkCollision } from "../gameHelpers";
@@ -56,9 +56,7 @@ export const usePlayer = () => {
   const resetPlayer = useCallback(() => {
     const tetromino = randomTetromino().shape;
     setPlayer(initialState(tetromino));
-    console.log("initState: ", initialState);
-    console.log("Player: ", player);
-  }, [player]);
+  }, []);
 
   return [player, updatePlayerPos, resetPlayer, playerRotate];
 };

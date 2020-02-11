@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { createStage, checkCollision } from "../../gameHelpers";
 
@@ -13,16 +13,19 @@ import Stage from "../Stage/Stage";
 import Display from "../Display/Display";
 import StartButton from "../StartButton/StartButton";
 import Highscore from "../Highscore/Highscore";
+import HighscoreModal from "../HighscoreModal/HighscoreModal";
 
 // Styled components
 import { StyledTetrisWrapper, StyledTetris } from "./Tetris.styles";
 
 const Tetris = () => {
-  const startSpeed = 500;
+  const startSpeed = 600;
   const [gameSpeed, setGameSpeed] = useState(startSpeed);
   const [dropTime, setDropTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
-
+  const [highscoreArr, setHighscoreArr] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [speedDrop, setSpeedDrop] = useState(false);
   const [player, updatePlayerPos, resetPlayer, playerRotate] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(
@@ -39,10 +42,9 @@ const Tetris = () => {
     setRows(0);
     setGameOver(false);
   };
-
+  
   const dropPlayer = () => {
-    setDropTime(null);
-    drop();
+    
   };
 
   const drop = () => {
@@ -53,7 +55,7 @@ const Tetris = () => {
       setGameSpeed(startSpeed / (level + 1) + 100);
       setDropTime(gameSpeed);
     }
-
+    
     if (!checkCollision(player, stage, { x: 0, y: 1 })) {
       updatePlayerPos({ x: 0, y: 1, collided: false });
     } else {
@@ -63,16 +65,21 @@ const Tetris = () => {
       if (player.pos.y < 1) {
         console.log("Game over");
         setGameOver(true);
-        setDropTime(null);
+        setDropTime(null); 
+        
+        if(highscoreArr.length < 5 || highscoreArr.slice(0, 5).find(highscore => score > highscore.score)) {
+          setShowModal(true);
+        }
       }
     }
   };
 
   const keyUp = e => {
+    e.preventDefault();
     if (!gameOver) {
       if (e.keyCode === 32) {
-        e.preventDefault();
-        setDropTime(gameSpeed);
+        setSpeedDrop(false);
+        setDropTime(gameSpeed)
       }
     }
   };
@@ -82,16 +89,17 @@ const Tetris = () => {
       updatePlayerPos({ x: dir, y: 0 });
     }
   };
-
+  
   const move = e => {
+    e.preventDefault();
     if (!gameOver) {
       if (e.keyCode === 37) {
         movePlayerHorizontal(-1);
       } else if (e.keyCode === 39) {
         movePlayerHorizontal(1);
-      } else if (e.keyCode === 32) {
-        e.preventDefault();
-        dropPlayer();
+      } else if (e.keyCode === 32 && !speedDrop) {
+        setSpeedDrop(true);
+        setDropTime(startSpeed * 0.08)
       } else if (e.keyCode === 38) {
         playerRotate(stage, 1);
       } else if (e.keyCode === 40) {
@@ -99,10 +107,25 @@ const Tetris = () => {
       }
     }
   };
-
+  
   useInterval(() => {
     drop();
   }, dropTime);
+
+  useEffect(() => {
+    setHighscoreArr(JSON.parse(localStorage.getItem("highscore")) || []);
+  }, [])
+
+  const onSubmitHighscore = name => {
+    setShowModal(false);
+    const highscoreItem = {name, score};
+    const newHighscoreArr = [...highscoreArr, highscoreItem];
+    newHighscoreArr.sort((a, b) => b.score - a.score);
+    newHighscoreArr.pop();
+    setHighscoreArr(newHighscoreArr);
+
+    localStorage.setItem("highscore", JSON.stringify(newHighscoreArr));
+  }
 
   // console.log("re-render");
   return (
@@ -114,12 +137,13 @@ const Tetris = () => {
     >
       <StyledTetris>
         <aside>
-          <Highscore gameOver={gameOver} />
+          <Highscore highscoreArray={highscoreArr} gameOver={gameOver} />
         </aside>
         <Stage stage={stage} gameOver={gameOver} />
+        {showModal ? <HighscoreModal submitName={onSubmitHighscore} /> : null}
         <aside>
           {gameOver ? (
-            <Display gameOver={gameOver} text="Game Over" />
+              <Display gameOver={gameOver} text="Game Over" />
           ) : (
             <React.Fragment>
               <Display text={"Score: " + score} />
