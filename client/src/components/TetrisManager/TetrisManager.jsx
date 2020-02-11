@@ -15,7 +15,6 @@ const TetrisManager = props => {
 
   useEffect(() => {
     createPlayer();
-    createPlayer();
   }, []);
 
   return (
