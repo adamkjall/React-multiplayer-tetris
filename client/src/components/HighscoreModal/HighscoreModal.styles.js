@@ -4,6 +4,7 @@ export const StyledHighscoreModal = styled.div`
   position: absolute;
   top: 50%;
   left: 50%;
+  z-index: 1000;
   transform: translate(-50%, -50%);
   background: rgba(2, 2, 170, 0.7);
   width: 300px;

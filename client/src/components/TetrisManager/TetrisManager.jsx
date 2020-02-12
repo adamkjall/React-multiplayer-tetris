@@ -1,30 +1,65 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 import Tetris from "../Tetris/Tetris";
 
-const TetrisManager = props => {
-  const [players, setPlayers] = useState([]);
+import ConnectionManager from "../../utils/ConnectionManager";
+import Events from "../../utils/Events";
 
-  const createPlayer = (player = "Adam") => {
-    setPlayers(prev => [...prev, player]);
+import { StyledTetrisManager } from "./TetrisManager.styles";
+
+class TetrisManager extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      players: new Map()
+    };
+  }
+
+  componentDidMount() {
+    this.createPlayer();
+    const connectionManager = new ConnectionManager(this);
+    connectionManager.connect("ws://192.168.1.4:9000");
+  }
+
+  createPlayer = (playerId = "localPlayer") => {
+    const events = new Events();
+    const isLocalPlayer = this.state.players.size === 0 ? true : false;
+    const gameState = {};
+    
+    this.setState(prev =>
+      prev.players.set(playerId, { events, isLocalPlayer, gameState })
+    );
   };
 
-  const removePlayer = (playerIndex = players.length - 1) => {
-    setPlayers(prev => prev.splice(playerIndex, 1));
+  removePlayer = id => {
+    this.setState(prev => prev.players.delete(id));
   };
 
-  useEffect(() => {
-    createPlayer();
-  }, []);
+  updateTetrisState = (id, newState) => {
+    const player = this.state.players.get(id);
+    player.gameState = {
+      ...player.gameState,
+      [newState.prop]: newState.value
+    }
+    this.setState(prev => prev.players.set(id, player))
+  }
 
-  return (
-    <React.Fragment>
-      {console.log("hello", players)}
-      {players.map((player, i )=> (
-        <Tetris key={i} isLocalTetris={i === 0 ? true : false} />
-      ))}
-    </React.Fragment>
-  );
-};
+  render() {
+    return (
+      <StyledTetrisManager>
+        {[...this.state.players.entries()].map(
+          ([playerId, { events, isLocalPlayer, gameState }]) => (
+            <Tetris
+              key={playerId}
+              events={events}
+              isLocalPlayer={isLocalPlayer}
+              gameState={gameState}
+            />
+          )
+        )}
+      </StyledTetrisManager>
+    );
+  }
+}
 
 export default TetrisManager;

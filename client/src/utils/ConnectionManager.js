@@ -1,6 +1,8 @@
 class ConnectionManager {
-  constructor() {
+  constructor(tetrisManager) {
     this.conn = null;
+    this.peers = new Map();
+    this.tetrisManager = tetrisManager;
   }
 
   connect(address) {
@@ -8,9 +10,85 @@ class ConnectionManager {
 
     this.conn.addEventListener("open", () => {
       console.log("Connection established");
+      this.initSession();
+      this.watchEvents();
+    });
 
-      this.conn.send("create-session");
-    })
+    this.conn.addEventListener("message", event => {
+      this.recieve(event.data);
+    });
+  }
+
+  initSession() {
+    const sessionId = window.location.hash.split("#")[1];
+    if (sessionId) {
+      this.send({
+        type: "join-session",
+        id: sessionId
+      });
+    } else {
+      this.send({
+        type: "create-session"
+      });
+    }
+  }
+
+  watchEvents() {
+    const localPlayer = this.tetrisManager.state.players.get("localPlayer");
+    const events = localPlayer.events;
+    ["player", "stage", "level", "rows", "score", "gameOver"].forEach(prop => {
+      events.listen(prop, value => {
+        this.send({
+          type: "state-update",
+          state: [prop, value]
+        });
+      });
+    });
+  }
+
+  updateManager(peers) {
+    const me = peers.you;
+    const clients = peers.clients.filter(client => me !== client);
+    clients.forEach(client => {
+      if (!this.peers.has(client)) {
+        this.tetrisManager.createPlayer(client);
+        this.peers.set(client, client);
+      }
+    });
+
+    this.peers.forEach(client => {
+      if (clients.findIndex(id => id === client) === -1) {
+        console.log("Remove ", client);
+        this.tetrisManager.removePlayer(client);
+      }
+    });
+  }
+
+  updatePeer(id, [prop, value]) {
+    if (!this.peers.has(id)) {
+      console.error("Client does not exist ", id);
+      return;
+    }
+    this.tetrisManager.updateTetrisState(id, {prop, value});
+
+  }
+
+  send(data) {
+    const msg = JSON.stringify(data);
+    // console.log(`Sending message: ${msg}`);
+    this.conn.send(msg);
+  }
+
+  recieve(msg) {
+    const data = JSON.parse(msg);
+    // console.log("Recieved message: ", data);
+    if (data.type === "session-created") {
+      window.location.hash = data.id;
+    } else if (data.type === "session-broadcast") {
+      this.updateManager(data.peers);
+    } else if (data.type === "state-update") {
+      this.updatePeer(data.clientId, data.state)
+    }
   }
 }
 

@@ -1,5 +1,6 @@
 html {
   box-sizing: border-box;
+  height: 100%;
 }
 
 *, *:before, *:after {
@@ -8,6 +9,7 @@ html {
 
 body {
   margin: 0;
+  height: 100%;
 }
 
 @font-face {

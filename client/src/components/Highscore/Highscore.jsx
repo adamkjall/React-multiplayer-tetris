@@ -5,7 +5,7 @@ import { StyledHighscore, PlayerScore } from "./Highscore.styles";
 const Highscore = ({ highscoreArray }) => {
   return (
     <StyledHighscore>
-      <div className="title">Highscore:</div>
+      <div className="title">Highscore</div>
       {highscoreArray.map((highscore, i) => (
         <PlayerScore key={i}>
           <span className="name">{highscore.name}</span>
