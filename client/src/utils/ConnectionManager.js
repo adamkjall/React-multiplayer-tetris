@@ -1,3 +1,4 @@
+import socketIOClient from "socket.io-client";
 class ConnectionManager {
   constructor(tetrisManager) {
     this.conn = null;
@@ -6,16 +7,16 @@ class ConnectionManager {
   }
 
   connect(address) {
-    this.conn = new WebSocket(address);
-
-    this.conn.addEventListener("open", () => {
+    this.conn = socketIOClient(address)
+    this.conn.on("connect", () => {
       console.log("Connection established");
+     
       this.initSession();
       this.watchEvents();
     });
 
-    this.conn.addEventListener("message", event => {
-      this.recieve(event.data);
+    this.conn.on("message", data => {
+      this.recieve(data);
     });
   }
 
@@ -44,6 +45,12 @@ class ConnectionManager {
         });
       });
     });
+    events.listen("highscore", highscore => {
+      this.send({
+        type: "update-highscore",
+        list: highscore
+      })
+    })
   }
 
   updateManager(peers) {
@@ -88,6 +95,8 @@ class ConnectionManager {
       this.updateManager(data.peers);
     } else if (data.type === "state-update") {
       this.updatePeer(data.clientId, data.state)
+    } else if (data.type === "highscore-list") {
+      this.tetrisManager.setHighscore(data.list);
     }
   }
 }

@@ -11,21 +11,37 @@ class TetrisManager extends React.Component {
   constructor() {
     super();
     this.state = {
-      players: new Map()
+      players: new Map(),
+      highscores: []
     };
   }
 
   componentDidMount() {
     this.createPlayer();
-    const connectionManager = new ConnectionManager(this);
-    connectionManager.connect("ws://192.168.1.4:9000");
+    this.connectionManager = new ConnectionManager(this);
+    this.connectionManager.connect("ws://192.168.1.4:8080");
   }
+
+  setHighscore = newHighscore => this.setState({ highscores: newHighscore });
+
+  onSubmitHighscore = newHighscoreArr => {
+    this.connectionManager.send({
+      type: "update-highscore",
+      list: newHighscoreArr
+    });
+  };
+
+  sendDataToServer = data => {
+    if (this.connectionManager) {
+      this.connectionManager.send(data);
+    }
+  };
 
   createPlayer = (playerId = "localPlayer") => {
     const events = new Events();
     const isLocalPlayer = this.state.players.size === 0 ? true : false;
     const gameState = {};
-    
+
     this.setState(prev =>
       prev.players.set(playerId, { events, isLocalPlayer, gameState })
     );
@@ -40,9 +56,9 @@ class TetrisManager extends React.Component {
     player.gameState = {
       ...player.gameState,
       [newState.prop]: newState.value
-    }
-    this.setState(prev => prev.players.set(id, player))
-  }
+    };
+    this.setState(prev => prev.players.set(id, player));
+  };
 
   render() {
     return (
@@ -54,6 +70,8 @@ class TetrisManager extends React.Component {
               events={events}
               isLocalPlayer={isLocalPlayer}
               gameState={gameState}
+              highscores={this.state.highscores}
+              handleHighscore={this.onSubmitHighscore}
             />
           )
         )}

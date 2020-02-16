@@ -7,7 +7,7 @@ const HighscoreModal = ({ submitName }) => {
 
   return <StyledHighscoreModal>
     <h2>Highscore!</h2>
-    <input onChange={e => setName(e.target.value)} placeholder="Enter your name" />
+    <input onChange={e => setName(e.target.value)} placeholder="Enter your name" value={name} />
     <button onClick={() => submitName(name)}>Submit</button>
   </StyledHighscoreModal>
 };

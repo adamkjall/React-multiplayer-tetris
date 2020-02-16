@@ -18,12 +18,11 @@ import HighscoreModal from "../HighscoreModal/HighscoreModal";
 // Styled components
 import { StyledTetrisWrapper, StyledTetris } from "./Tetris.styles";
 
-const Tetris = ({ isLocalPlayer, events, gameState }) => {
+const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore }) => {
   const startSpeed = 700;
   const [gameSpeed, setGameSpeed] = useState(startSpeed);
   const [dropTime, setDropTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
-  const [highscoreArr, setHighscoreArr] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [speedDrop, setSpeedDrop] = useState(false);
   const [
@@ -37,10 +36,6 @@ const Tetris = ({ isLocalPlayer, events, gameState }) => {
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(
     rowsCleared
   );
-
-  useEffect(() => {
-    setHighscoreArr(JSON.parse(localStorage.getItem("highscore")) || []);
-  }, []);
 
   useEffect(() => {
     if (!isLocalPlayer) {
@@ -88,7 +83,6 @@ const Tetris = ({ isLocalPlayer, events, gameState }) => {
   }, [events, rows]);
 
   useEffect(() => {
-    console.log("tjoohoo")
     events.emit("level", level);
   }, [events, level]);
 
@@ -142,8 +136,8 @@ const Tetris = ({ isLocalPlayer, events, gameState }) => {
         setDropTime(null);
 
         if (
-          highscoreArr.length < 5 ||
-          highscoreArr.slice(0, 5).find(highscore => score > highscore.score)
+          highscores.length < 5 ||
+          highscores.slice(0, 5).find(highscore => score > highscore.score)
         ) {
           setShowModal(true);
         }
@@ -152,6 +146,7 @@ const Tetris = ({ isLocalPlayer, events, gameState }) => {
   };
 
   const keyUp = e => {
+    if (gameOver) return;
     e.preventDefault();
     if (isLocalPlayer && !gameOver) {
       if (e.keyCode === 32) {
@@ -168,6 +163,8 @@ const Tetris = ({ isLocalPlayer, events, gameState }) => {
   };
 
   const move = e => {
+    if (gameOver) return;
+
     e.preventDefault();
     if (isLocalPlayer && !gameOver) {
       if (e.keyCode === 37) {
@@ -187,12 +184,11 @@ const Tetris = ({ isLocalPlayer, events, gameState }) => {
   const onSubmitHighscore = name => {
     setShowModal(false);
     const highscoreItem = { name, score };
-    const newHighscoreArr = [...highscoreArr, highscoreItem];
+    const newHighscoreArr = [...highscores, highscoreItem];
     newHighscoreArr.sort((a, b) => b.score - a.score);
-    newHighscoreArr.pop();
-    setHighscoreArr(newHighscoreArr);
-
-    localStorage.setItem("highscore", JSON.stringify(newHighscoreArr));
+    if(newHighscoreArr.length > 5) newHighscoreArr.pop();
+    
+    handleHighscore(newHighscoreArr)
   };
 
   useInterval(() => {
@@ -222,8 +218,8 @@ const Tetris = ({ isLocalPlayer, events, gameState }) => {
 
             {isLocalPlayer ? (
               <React.Fragment>
-                <StartButton clickHandle={startGame} />
-                <Highscore highscoreArray={highscoreArr} gameOver={gameOver} />
+                <StartButton clickHandle={!showModal ? startGame : null} />
+                <Highscore highscoreArray={highscores} gameOver={gameOver} />
               </React.Fragment>
             ) : null}
           </React.Fragment>
