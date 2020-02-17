@@ -23,7 +23,7 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
   const [gameSpeed, setGameSpeed] = useState(startSpeed);
   const [dropTime, setDropTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [speedDrop, setSpeedDrop] = useState(false);
   const [
     player,
