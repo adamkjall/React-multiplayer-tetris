@@ -1,11 +1,84 @@
-const WebSocketServer = require("ws").Server;
+const express = require("express");
+const socket = require("socket.io");
 
 const Session = require("./session");
 const Client = require("./client");
 
-const server = new WebSocketServer({ port: 9000 });
+const { getHighscoreList, updateHighscoreList } = require("./firebase/firebase");
 
+const port = 8080;
 const sessions = new Map();
+
+// app setup
+const app = express();
+const server = app.listen(port, () =>
+  console.log("Listening to reuests on port: " + port)
+);
+
+// static files
+app.use(express.static("../client/build"));
+
+// socket setup
+const io = socket(server);
+
+io.on("connect", socket => {
+  console.log("Connected to socket: ", socket.id);
+  const client = createClient(socket);
+
+  getHighscoreList().then(data => {
+    client.send({
+      type: "highscore-list",
+      list: data
+    });
+  });
+
+  socket.on("message", msg => {
+    const data = JSON.parse(msg);
+
+    switch (data.type) {
+      case "create-session": {
+        const session = createSession();
+        session.join(client);
+        client.send({
+          type: "session-created",
+          id: session.id
+        });
+        break;
+      }
+      case "join-session": {
+        const session = getSession(data.id) || createSession(data.id);
+        session.join(client);
+        broadCastSession(session);
+
+        break;
+      }
+      case "state-update":
+        client.broadcast(data);
+        break;
+      case "update-highscore":
+        updateHighscoreList(data.list);
+        const package = {
+          type: "highscore-list",
+          list: data.list
+        }
+        client.send(package) // to self
+        client.broadcast(package) // to everyone else
+        break;
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Connection closed");
+    const session = client.session;
+    if (session) {
+      session.leave(client);
+      if (session.clients.size === 0) {
+        sessions.delete(session.id);
+      }
+    }
+    broadCastSession(session);
+  });
+});
 
 function createId(len = 6, chars = "abcdefghjkmnopqrstwxyz0123456789") {
   let id = "";
@@ -25,7 +98,7 @@ function createSession(id = createId()) {
   }
 
   const session = new Session(id);
-  console.log("Createing session ", session);
+  console.log("Creating session ", session);
 
   sessions.set(id, session);
 
@@ -51,38 +124,38 @@ function broadCastSession(session) {
   });
 }
 
-server.on("connection", conn => {
-  console.log("Connection established");
-  const client = createClient(conn);
+// server.on("connection", conn => {
+//   console.log("Connection established");
+//   const client = createClient(conn);
 
-  conn.on("message", msg => {
-    const data = JSON.parse(msg);
+//   conn.on("message", msg => {
+//     const data = JSON.parse(msg);
 
-    if (data.type === "create-session") {
-      const session = createSession();
-      session.join(client);
-      client.send({
-        type: "session-created",
-        id: session.id
-      });
-    } else if (data.type === "join-session") {
-      const session = getSession(data.id) || createSession(data.id);
-      session.join(client);
-      broadCastSession(session);
-    } else if (data.type === "state-update") {
-      client.broadcast(data);
-    }
-  });
+//     if (data.type === "create-session") {
+//       const session = createSession();
+//       session.join(client);
+//       client.send({
+//         type: "session-created",
+//         id: session.id
+//       });
+//     } else if (data.type === "join-session") {
+//       const session = getSession(data.id) || createSession(data.id);
+//       session.join(client);
+//       broadCastSession(session);
+//     } else if (data.type === "state-update") {
+//       client.broadcast(data);
+//     }
+//   });
 
-  conn.on("close", () => {
-    console.log("Connection closed");
-    const session = client.session;
-    if (session) {
-      session.leave(client);
-      if (session.clients.size === 0) {
-        sessions.delete(session.id);
-      }
-    }
-    broadCastSession(session);
-  });
-});
+//   conn.on("close", () => {
+//     console.log("Connection closed");
+//     const session = client.session;
+//     if (session) {
+//       session.leave(client);
+//       if (session.clients.size === 0) {
+//         sessions.delete(session.id);
+//       }
+//     }
+//     broadCastSession(session);
+//   });
+// });

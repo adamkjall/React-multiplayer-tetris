@@ -16,6 +16,7 @@ class Session {
     if (client.session !== this) {
       throw new Error("Client not in session");
     }
+
     this.clients.delete(client);
     client.session = null;
   }
