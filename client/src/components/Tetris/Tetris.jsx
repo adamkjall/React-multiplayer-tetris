@@ -23,7 +23,7 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
   const [gameSpeed, setGameSpeed] = useState(startSpeed);
   const [dropTime, setDropTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(true);
   const [speedDrop, setSpeedDrop] = useState(false);
   const [
     player,
@@ -102,7 +102,7 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
     // Reset everything
     setStage(createStage());
     setGameSpeed(isLocalPlayer ? startSpeed : null)
-    setDropTime(gameSpeed);
+    setDropTime(startSpeed);
     resetPlayer();
     setScore(0);
     setLevel(1);
@@ -146,9 +146,9 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
   };
 
   const keyUp = e => {
-    if (gameOver) return;
     e.preventDefault();
-    if (isLocalPlayer && !gameOver) {
+    if (!gameOver) 
+       if (isLocalPlayer && !gameOver) {
       if (e.keyCode === 32) {
         setSpeedDrop(false);
         setDropTime(gameSpeed);
@@ -163,7 +163,7 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
   };
 
   const move = e => {
-    if (gameOver) return;
+    if (gameOver || showModal) return;
 
     e.preventDefault();
     if (isLocalPlayer && !gameOver) {
