@@ -75,6 +75,9 @@ class ConnectionManager {
         this.tetrisManager.removePlayer(client);
       }
     });
+
+    const sorted = peers.clients.map(client => this.peers.get(client.id))
+    this.tetrisManager.sortPlayers(sorted);
   }
 
   updatePeer(id, [prop, value]) {
@@ -100,10 +103,11 @@ class ConnectionManager {
       this.updateManager(data.peers);
     } else if (data.type === "state-update") {
       this.updatePeer(data.clientId, data.state);
-    } else if (data.type === "state-broadcast") { // update entire state
+    } else if (data.type === "state-broadcast") {
+      // update entire state
       Object.entries(data.state).forEach(entry => {
-        this.updatePeer(data.clientId, entry)
-      })
+        this.updatePeer(data.clientId, entry);
+      });
     } else if (data.type === "highscore-list") {
       this.tetrisManager.setHighscore(data.list);
     }

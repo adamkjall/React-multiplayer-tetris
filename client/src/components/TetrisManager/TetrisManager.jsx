@@ -2,8 +2,8 @@ import React from "react";
 
 import Tetris from "../Tetris/Tetris";
 
-import ConnectionManager from "../../utils/ConnectionManager";
-import Events from "../../utils/Events";
+import ConnectionManager from "../../utils/connectionManager";
+import Events from "../../utils/events";
 
 import { StyledTetrisManager } from "./TetrisManager.styles";
 
@@ -19,8 +19,11 @@ class TetrisManager extends React.Component {
   componentDidMount() {
     this.createPlayer();
     this.connectionManager = new ConnectionManager(this);
-    // this.connectionManager.connect("https://react-tetris-api.herokuapp.com/");
     this.connectionManager.connect("ws://localhost:3001");
+  }
+  
+  connectToServer = () => {
+    // this.connectionManager.connect("https://react-tetris-api.herokuapp.com/");
   }
 
   setHighscore = newHighscore => this.setState({ highscores: newHighscore });
@@ -49,6 +52,10 @@ class TetrisManager extends React.Component {
   removePlayer = id => {
     this.setState(prev => prev.players.delete(id));
   };
+
+  sortPlayers = (players) => {
+    console.log("woop", this.state.players)
+  }
 
   updateTetrisState = (id, newState) => {
     const player = this.state.players.get(id);

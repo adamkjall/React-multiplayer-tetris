@@ -49,14 +49,14 @@ const Tetris = ({
       const player = gameState.player;
       if (player) setPlayer(player);
     }
-  }, [gameState.player]);
+  }, [gameState.player, isLocalPlayer, setPlayer]);
 
   useEffect(() => {
     if (!isLocalPlayer) {
       const stage = gameState.stage;
       if (stage) setStage(stage);
     }
-  }, [gameState.stage]);
+  }, [gameState.stage, isLocalPlayer, setStage]);
 
   useEffect(() => {
     if (!isLocalPlayer) {
@@ -65,11 +65,25 @@ const Tetris = ({
       if (gameState.rows) setRows(gameState.rows);
       if (gameState.level) setLevel(gameState.level);
     }
-  }, [gameState.gameOver, gameState.score, gameState.rows, gameState.level]);
+  }, [
+    gameState.gameOver,
+    gameState.score,
+    gameState.rows,
+    gameState.level,
+    isLocalPlayer
+  ]);
 
   useEffect(() => {
+    // for every player that joins the session
+    // broadcast our local state to all clients
     if (isLocalPlayer && nPlayers > 1) {
-      const state = serialize();
+      const state = {
+        stage,
+        gameOver,
+        score,
+        rows,
+        level
+      };
       events.emit("state", state);
     }
   }, [nPlayers]);
@@ -192,16 +206,6 @@ const Tetris = ({
     if (newHighscoreArr.length > 5) newHighscoreArr.pop();
 
     handleHighscore(newHighscoreArr);
-  };
-
-  const serialize = () => {
-    return {
-      stage,
-      gameOver,
-      score,
-      rows,
-      level
-    };
   };
 
   // console.log("re-render");
