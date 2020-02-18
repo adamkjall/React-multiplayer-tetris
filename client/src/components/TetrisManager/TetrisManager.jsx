@@ -19,13 +19,14 @@ class TetrisManager extends React.Component {
   componentDidMount() {
     this.createPlayer();
     this.connectionManager = new ConnectionManager(this);
-    this.connectionManager.connect("https://react-tetris-api.herokuapp.com/");
+    // this.connectionManager.connect("https://react-tetris-api.herokuapp.com/");
+    this.connectionManager.connect("ws://localhost:3001");
   }
 
   setHighscore = newHighscore => this.setState({ highscores: newHighscore });
 
   onSubmitHighscore = newHighscoreArr => {
-    this.connectionManager.send({
+    this.sendDataToServer({
       type: "update-highscore",
       list: newHighscoreArr
     });
@@ -37,11 +38,9 @@ class TetrisManager extends React.Component {
     }
   };
 
-  createPlayer = (playerId = "localPlayer") => {
+  createPlayer = (playerId = "localPlayer", gameState = {}) => {
     const events = new Events();
     const isLocalPlayer = this.state.players.size === 0 ? true : false;
-    const gameState = {};
-
     this.setState(prev =>
       prev.players.set(playerId, { events, isLocalPlayer, gameState })
     );
@@ -72,6 +71,7 @@ class TetrisManager extends React.Component {
               gameState={gameState}
               highscores={this.state.highscores}
               handleHighscore={this.onSubmitHighscore}
+              nPlayers={this.state.players.size}
             />
           )
         )}

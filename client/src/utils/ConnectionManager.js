@@ -7,10 +7,10 @@ class ConnectionManager {
   }
 
   connect(address) {
-    this.conn = socketIOClient(address)
+    this.conn = socketIOClient(address);
     this.conn.on("connect", () => {
       console.log("Connection established");
-     
+
       this.initSession();
       this.watchEvents();
     });
@@ -49,8 +49,14 @@ class ConnectionManager {
       this.send({
         type: "update-highscore",
         list: highscore
-      })
-    })
+      });
+    });
+    events.listen("state", state => {
+      this.send({
+        type: "state-broadcast",
+        state
+      });
+    });
   }
 
   updateManager(peers) {
@@ -76,8 +82,7 @@ class ConnectionManager {
       console.error("Client does not exist ", id);
       return;
     }
-    this.tetrisManager.updateTetrisState(id, {prop, value});
-
+    this.tetrisManager.updateTetrisState(id, { prop, value });
   }
 
   send(data) {
@@ -94,7 +99,11 @@ class ConnectionManager {
     } else if (data.type === "session-broadcast") {
       this.updateManager(data.peers);
     } else if (data.type === "state-update") {
-      this.updatePeer(data.clientId, data.state)
+      this.updatePeer(data.clientId, data.state);
+    } else if (data.type === "state-broadcast") { // update entire state
+      Object.entries(data.state).forEach(entry => {
+        this.updatePeer(data.clientId, entry)
+      })
     } else if (data.type === "highscore-list") {
       this.tetrisManager.setHighscore(data.list);
     }

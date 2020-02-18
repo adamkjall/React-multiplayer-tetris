@@ -4,7 +4,10 @@ const socket = require("socket.io");
 const Session = require("./session");
 const Client = require("./client");
 
-const { getHighscoreList, updateHighscoreList } = require("./firebase/firebase");
+const {
+  getHighscoreList,
+  updateHighscoreList
+} = require("./firebase/firebase");
 
 const port = process.env.PORT || 8080;
 const sessions = new Map();
@@ -31,9 +34,10 @@ io.on("connect", socket => {
       list: data
     });
   });
-
+  
   socket.on("message", msg => {
     const data = JSON.parse(msg);
+    let i = 1;
 
     switch (data.type) {
       case "create-session": {
@@ -48,11 +52,13 @@ io.on("connect", socket => {
       case "join-session": {
         const session = getSession(data.id) || createSession(data.id);
         session.join(client);
-        broadCastSession(session);
-
+        broadcastSession(session);
         break;
       }
       case "state-update":
+        client.broadcast(data);
+        break;
+      case "state-broadcast":
         client.broadcast(data);
         break;
       case "update-highscore":
@@ -60,9 +66,9 @@ io.on("connect", socket => {
         const package = {
           type: "highscore-list",
           list: data.list
-        }
-        client.send(package) // to self
-        client.broadcast(package) // to everyone else
+        };
+        client.send(package); // to self
+        client.broadcast(package); // to everyone else
         break;
     }
   });
@@ -76,7 +82,7 @@ io.on("connect", socket => {
         sessions.delete(session.id);
       }
     }
-    broadCastSession(session);
+    broadcastSession(session);
   });
 });
 
@@ -109,7 +115,7 @@ function getSession(id) {
   return sessions.get(id);
 }
 
-function broadCastSession(session) {
+function broadcastSession(session) {
   if (!session) return;
 
   const clients = [...session.clients];

@@ -18,7 +18,14 @@ import HighscoreModal from "../HighscoreModal/HighscoreModal";
 // Styled components
 import { StyledTetrisWrapper, StyledTetris } from "./Tetris.styles";
 
-const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore }) => {
+const Tetris = ({
+  isLocalPlayer,
+  events,
+  gameState,
+  highscores,
+  handleHighscore,
+  nPlayers
+}) => {
   const startSpeed = 700;
   const [gameSpeed, setGameSpeed] = useState(startSpeed);
   const [dropTime, setDropTime] = useState(null);
@@ -40,39 +47,32 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
   useEffect(() => {
     if (!isLocalPlayer) {
       const player = gameState.player;
-      if (player) {
-        setPlayer(player);
-      }
+      if (player) setPlayer(player);
     }
   }, [gameState.player]);
 
   useEffect(() => {
     if (!isLocalPlayer) {
       const stage = gameState.stage;
-      if (stage) {
-        setStage(stage);
-      }
+      if (stage) setStage(stage);
     }
   }, [gameState.stage]);
 
   useEffect(() => {
     if (!isLocalPlayer) {
-      const gameOver = gameState.gameOver;
-      if (gameOver !== undefined) {
-        setGameOver(gameOver);
-      }
+      if (gameState.gameOver) setGameOver(gameState.gameOver);
+      if (gameState.score) setScore(gameState.score);
+      if (gameState.rows) setRows(gameState.rows);
+      if (gameState.level) setLevel(gameState.level);
     }
-  }, [gameState.gameOver]);
+  }, [gameState.gameOver, gameState.score, gameState.rows, gameState.level]);
 
-  
   useEffect(() => {
-    if (!isLocalPlayer) {
-      const level = gameState.level;
-      if (level !== undefined) {
-        setLevel(level);
-      }
+    if (isLocalPlayer && nPlayers > 1) {
+      const state = serialize();
+      events.emit("state", state);
     }
-  }, [gameState.level]);
+  }, [nPlayers]);
 
   useEffect(() => {
     events.emit("score", score);
@@ -98,10 +98,14 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
     events.emit("stage", stage);
   }, [events, stage]);
 
+  useInterval(() => {
+    drop();
+  }, dropTime);
+
   const startGame = () => {
     // Reset everything
     setStage(createStage());
-    setGameSpeed(isLocalPlayer ? startSpeed : null)
+    setGameSpeed(isLocalPlayer ? startSpeed : null);
     setDropTime(startSpeed);
     resetPlayer();
     setScore(0);
@@ -117,10 +121,10 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
 
   const drop = () => {
     // Increase level when player has cleared 10 rows
-    if (rows > (level + 1) * 5) {
+    if (rows >= level * 5) {
       setLevel(prev => prev + 1);
       // also increase speed
-      setGameSpeed(startSpeed / (level + 1) + 150);
+      setGameSpeed(startSpeed / (level + 1) + 180);
       setDropTime(gameSpeed);
     }
 
@@ -128,18 +132,17 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
       updatePlayerPos({ x: 0, y: 1, collided: false });
     } else {
       updatePlayerPos({ x: 0, y: 0, collided: true });
-
       // Game over
       if (player.pos.y < 1) {
         console.log("Game over");
         setGameOver(true);
         setDropTime(null);
-
+        // check if player is eligable to submit to highscore
         if (
           highscores.length < 5 ||
           highscores.slice(0, 5).find(highscore => score > highscore.score)
         ) {
-          setShowModal(true);
+          setShowModal(true); // show highscore submit modal
         }
       }
     }
@@ -147,13 +150,13 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
 
   const keyUp = e => {
     e.preventDefault();
-    if (!gameOver) 
-       if (isLocalPlayer && !gameOver) {
-      if (e.keyCode === 32) {
-        setSpeedDrop(false);
-        setDropTime(gameSpeed);
+    if (!gameOver)
+      if (isLocalPlayer && !gameOver) {
+        if (e.keyCode === 32) {
+          setSpeedDrop(false);
+          setDropTime(gameSpeed);
+        }
       }
-    }
   };
 
   const movePlayerHorizontal = dir => {
@@ -186,15 +189,23 @@ const Tetris = ({ isLocalPlayer, events, gameState, highscores, handleHighscore 
     const highscoreItem = { name, score };
     const newHighscoreArr = [...highscores, highscoreItem];
     newHighscoreArr.sort((a, b) => b.score - a.score);
-    if(newHighscoreArr.length > 5) newHighscoreArr.pop();
-    
-    handleHighscore(newHighscoreArr)
+    if (newHighscoreArr.length > 5) newHighscoreArr.pop();
+
+    handleHighscore(newHighscoreArr);
   };
 
-  useInterval(() => {
-    drop();
-  }, dropTime);
+  const serialize = () => {
+    return {
+      stage,
+      gameOver,
+      score,
+      rows,
+      level
+    };
+  };
+
   // console.log("re-render");
+  // console.log("state: ", serialize())
   return (
     <StyledTetrisWrapper
       role="button"
