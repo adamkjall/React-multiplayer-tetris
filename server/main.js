@@ -6,7 +6,7 @@ const Client = require("./client");
 
 const { getHighscoreList, updateHighscoreList } = require("./firebase/firebase");
 
-const port = 8080;
+const port = process.env.PORT || 8080;
 const sessions = new Map();
 
 // app setup
@@ -123,39 +123,3 @@ function broadCastSession(session) {
     });
   });
 }
-
-// server.on("connection", conn => {
-//   console.log("Connection established");
-//   const client = createClient(conn);
-
-//   conn.on("message", msg => {
-//     const data = JSON.parse(msg);
-
-//     if (data.type === "create-session") {
-//       const session = createSession();
-//       session.join(client);
-//       client.send({
-//         type: "session-created",
-//         id: session.id
-//       });
-//     } else if (data.type === "join-session") {
-//       const session = getSession(data.id) || createSession(data.id);
-//       session.join(client);
-//       broadCastSession(session);
-//     } else if (data.type === "state-update") {
-//       client.broadcast(data);
-//     }
-//   });
-
-//   conn.on("close", () => {
-//     console.log("Connection closed");
-//     const session = client.session;
-//     if (session) {
-//       session.leave(client);
-//       if (session.clients.size === 0) {
-//         sessions.delete(session.id);
-//       }
-//     }
-//     broadCastSession(session);
-//   });
-// });

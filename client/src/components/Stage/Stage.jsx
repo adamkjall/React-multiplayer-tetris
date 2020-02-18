@@ -10,4 +10,4 @@ const Stage = ({ stage, gameOver, isLocalPlayer }) => (
   </StyledStage>
 );
 
-export default Stage;
+export default React.memo(Stage);
