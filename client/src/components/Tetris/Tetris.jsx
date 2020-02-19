@@ -27,14 +27,15 @@ const Tetris = ({
   nPlayers
 }) => {
   const startSpeed = 700;
+  const [playerSpeed, setPlayerSpeed] = useState(null);
   const [gameSpeed, setGameSpeed] = useState(startSpeed);
   const [dropTime, setDropTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [speedDrop, setSpeedDrop] = useState(false);
+  const [playerDir, setPlayerDir] = useState(0);
   const [
     player,
-    setPlayer,
     updatePlayerPos,
     resetPlayer,
     playerRotate
@@ -46,13 +47,6 @@ const Tetris = ({
 
   useEffect(() => {
     if (!isLocalPlayer) {
-      const player = gameState.player;
-      if (player) setPlayer(player);
-    }
-  }, [gameState.player, isLocalPlayer, setPlayer]);
-
-  useEffect(() => {
-    if (!isLocalPlayer) {
       const stage = gameState.stage;
       if (stage) setStage(stage);
     }
@@ -60,33 +54,29 @@ const Tetris = ({
 
   useEffect(() => {
     if (!isLocalPlayer) {
-      if (gameState.gameOver) setGameOver(gameState.gameOver);
-      if (gameState.score) setScore(gameState.score);
-      if (gameState.rows) setRows(gameState.rows);
-      if (gameState.level) setLevel(gameState.level);
+      if (gameState.gameOver !== undefined) setGameOver(gameState.gameOver);
+      if (gameState.score !== undefined) setScore(gameState.score);
+      if (gameState.rows !== undefined) setRows(gameState.rows);
+      if (gameState.level !== undefined) setLevel(gameState.level);
     }
   }, [
     gameState.gameOver,
     gameState.score,
     gameState.rows,
     gameState.level,
-    isLocalPlayer
+    isLocalPlayer,
+    setScore,
+    setRows,
   ]);
 
   useEffect(() => {
     // for every player that joins the session
     // broadcast our local state to all clients
     if (isLocalPlayer && nPlayers > 1) {
-      const state = {
-        stage,
-        gameOver,
-        score,
-        rows,
-        level
-      };
+      const state = serializeGameState();
       events.emit("state", state);
     }
-  }, [nPlayers]);
+  }, [nPlayers, events, isLocalPlayer]);
 
   useEffect(() => {
     events.emit("score", score);
@@ -113,8 +103,14 @@ const Tetris = ({
   }, [events, stage]);
 
   useInterval(() => {
+    console.log("drop")
     drop();
   }, dropTime);
+
+  useInterval(() => {
+    console.log("move")
+    movePlayer()
+  }, playerSpeed);
 
   const startGame = () => {
     // Reset everything
@@ -164,12 +160,13 @@ const Tetris = ({
 
   const keyUp = e => {
     e.preventDefault();
-    if (!gameOver)
-      if (isLocalPlayer && !gameOver) {
-        if (e.keyCode === 32) {
-          setSpeedDrop(false);
-          setDropTime(gameSpeed);
-        }
+    if (!gameOver && isLocalPlayer)
+      if (e.keyCode === 32) {
+        setSpeedDrop(false);
+        setDropTime(gameSpeed);
+      } else if (e.keyCode === 37 || e.keyCode === 39) {
+        setPlayerSpeed(null)
+        setPlayerDir(0)
       }
   };
 
@@ -179,15 +176,29 @@ const Tetris = ({
     }
   };
 
-  const move = e => {
+  const movePlayer = () => {
+    if (playerDir) {
+      movePlayerHorizontal(playerDir)
+    }
+  }
+
+  const keyDown = e => {
     if (gameOver || showModal) return;
 
     e.preventDefault();
+    if (e.repeat) return;
+
     if (isLocalPlayer && !gameOver) {
       if (e.keyCode === 37) {
         movePlayerHorizontal(-1);
+        setPlayerDir(-1)
+        setPlayerSpeed(110)
+        // movePlayer(-1)
       } else if (e.keyCode === 39) {
         movePlayerHorizontal(1);
+        setPlayerDir(1)
+        setPlayerSpeed(110)
+        // movePlayer(1)
       } else if (e.keyCode === 32 && !speedDrop) {
         dropPlayer();
       } else if (e.keyCode === 38) {
@@ -208,13 +219,17 @@ const Tetris = ({
     handleHighscore(newHighscoreArr);
   };
 
+  function serializeGameState() {
+    return { stage, gameOver, score, rows, level };
+  }
+
   // console.log("re-render");
   // console.log("state: ", serialize())
   return (
     <StyledTetrisWrapper
       role="button"
       tabIndex="0"
-      onKeyDown={move}
+      onKeyDown={keyDown}
       onKeyUp={keyUp}
     >
       <StyledTetris>

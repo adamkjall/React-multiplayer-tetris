@@ -18,4 +18,4 @@ const Highscore = ({ highscoreArray }) => {
   );
 };
 
-export default Highscore;
+export default React.memo(Highscore);

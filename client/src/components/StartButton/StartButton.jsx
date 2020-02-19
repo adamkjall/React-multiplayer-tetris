@@ -6,4 +6,4 @@ const StartButton = ({ clickHandle }) => (
   <StyledStartButton onClick={clickHandle}>Start Game</StyledStartButton>
 );
 
-export default StartButton;
+export default React.memo(StartButton);

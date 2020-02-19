@@ -58,5 +58,5 @@ export const usePlayer = () => {
     setPlayer(initialState(tetromino));
   }, []);
 
-  return [player, setPlayer, updatePlayerPos, resetPlayer, playerRotate];
+  return [player, updatePlayerPos, resetPlayer, playerRotate];
 };

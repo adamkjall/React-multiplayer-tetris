@@ -1,10 +1,13 @@
 import React from "react";
 
+// Components
 import Tetris from "../Tetris/Tetris";
-
+import StartMenu from "../StartMenu/StartMenu";
+// utils
 import ConnectionManager from "../../utils/connectionManager";
 import Events from "../../utils/events";
 
+// styled components
 import { StyledTetrisManager } from "./TetrisManager.styles";
 
 class TetrisManager extends React.Component {
@@ -12,19 +15,20 @@ class TetrisManager extends React.Component {
     super();
     this.state = {
       players: new Map(),
-      highscores: []
+      highscores: [],
+      isStartGame: true
     };
   }
 
   componentDidMount() {
     this.createPlayer();
+  }
+
+  connectToServer = () => {
     this.connectionManager = new ConnectionManager(this);
     this.connectionManager.connect("ws://localhost:3001");
-  }
-  
-  connectToServer = () => {
     // this.connectionManager.connect("https://react-tetris-api.herokuapp.com/");
-  }
+  };
 
   setHighscore = newHighscore => this.setState({ highscores: newHighscore });
 
@@ -53,9 +57,9 @@ class TetrisManager extends React.Component {
     this.setState(prev => prev.players.delete(id));
   };
 
-  sortPlayers = (players) => {
-    console.log("woop", this.state.players)
-  }
+  sortPlayers = players => {
+    // console.log("woop", this.state.players)
+  };
 
   updateTetrisState = (id, newState) => {
     const player = this.state.players.get(id);
@@ -69,8 +73,12 @@ class TetrisManager extends React.Component {
   render() {
     return (
       <StyledTetrisManager>
-        {[...this.state.players.entries()].map(
-          ([playerId, { events, isLocalPlayer, gameState }]) => (
+        {!this.state.isStartGame ? (
+          <StartMenu/>
+        ) : (
+          [
+            ...this.state.players.entries()
+          ].map(([playerId, { events, isLocalPlayer, gameState }]) => (
             <Tetris
               key={playerId}
               events={events}
@@ -80,7 +88,7 @@ class TetrisManager extends React.Component {
               handleHighscore={this.onSubmitHighscore}
               nPlayers={this.state.players.size}
             />
-          )
+          ))
         )}
       </StyledTetrisManager>
     );
