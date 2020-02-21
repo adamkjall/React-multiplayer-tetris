@@ -27,13 +27,11 @@ const Tetris = ({
   nPlayers
 }) => {
   const startSpeed = 700;
-  const [playerSpeed, setPlayerSpeed] = useState(null);
   const [gameSpeed, setGameSpeed] = useState(startSpeed);
   const [dropTime, setDropTime] = useState(null);
   const [gameOver, setGameOver] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [speedDrop, setSpeedDrop] = useState(false);
-  const [playerDir, setPlayerDir] = useState(0);
   const [
     player,
     updatePlayerPos,
@@ -107,11 +105,6 @@ const Tetris = ({
     drop();
   }, dropTime);
 
-  useInterval(() => {
-    console.log("move")
-    movePlayer()
-  }, playerSpeed);
-
   const startGame = () => {
     // Reset everything
     setStage(createStage());
@@ -164,9 +157,6 @@ const Tetris = ({
       if (e.keyCode === 32) {
         setSpeedDrop(false);
         setDropTime(gameSpeed);
-      } else if (e.keyCode === 37 || e.keyCode === 39) {
-        setPlayerSpeed(null)
-        setPlayerDir(0)
       }
   };
 
@@ -176,29 +166,16 @@ const Tetris = ({
     }
   };
 
-  const movePlayer = () => {
-    if (playerDir) {
-      movePlayerHorizontal(playerDir)
-    }
-  }
-
   const keyDown = e => {
     if (gameOver || showModal) return;
 
     e.preventDefault();
-    if (e.repeat) return;
 
     if (isLocalPlayer && !gameOver) {
       if (e.keyCode === 37) {
         movePlayerHorizontal(-1);
-        setPlayerDir(-1)
-        setPlayerSpeed(110)
-        // movePlayer(-1)
       } else if (e.keyCode === 39) {
         movePlayerHorizontal(1);
-        setPlayerDir(1)
-        setPlayerSpeed(110)
-        // movePlayer(1)
       } else if (e.keyCode === 32 && !speedDrop) {
         dropPlayer();
       } else if (e.keyCode === 38) {
