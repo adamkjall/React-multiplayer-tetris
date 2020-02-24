@@ -15,7 +15,7 @@ const sessions = new Map();
 // app setup
 const app = express();
 const server = app.listen(port, () =>
-  console.log("Listening to reuests on port: " + port)
+  console.log("Listening to requests on port: " + port)
 );
 
 // socket setup
