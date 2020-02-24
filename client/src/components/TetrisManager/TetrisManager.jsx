@@ -4,9 +4,8 @@ import React from "react";
 import Tetris from "../Tetris/Tetris";
 import StartMenu from "../StartMenu/StartMenu";
 // utils
-import ConnectionManager from "../../utils/connectionManager";
 import Events from "../../utils/events";
-
+import ConnectionManager from "../../utils/connectionManager";
 // styled components
 import { StyledTetrisManager } from "./TetrisManager.styles";
 
@@ -24,7 +23,7 @@ class TetrisManager extends React.Component {
     this.createPlayer();
     this.connectionManager = new ConnectionManager(this);
     // this.connectionManager.connect("ws://localhost:3001");
-    this.connectionManager.connect("https://react-tetris-api.herokuapp.com/");
+    this.connectionManager.connect("ws://react-tetris-api.herokuapp.com/");
   }
 
   connectToServer = () => {

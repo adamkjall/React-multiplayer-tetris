@@ -18,9 +18,6 @@ const server = app.listen(port, () =>
   console.log("Listening to reuests on port: " + port)
 );
 
-// static files
-app.use(express.static("../client/build"));
-
 // socket setup
 const io = socket(server);
 

@@ -101,7 +101,6 @@ const Tetris = ({
   }, [events, stage]);
 
   useInterval(() => {
-    console.log("drop")
     drop();
   }, dropTime);
 
