@@ -8,10 +8,11 @@ export const StyledHighscore = styled.div`
   color: #ddd;
   background: #333333cf;
   border-radius: 1.25rem;
+  /* font-size: 0.7rem; */
 
   .title {
+  /* font-size: 0.8rem; */
     padding-bottom: .5rem;
-    font-size: .8rem;
     text-align: center;
     letter-spacing: 0.1rem;
   }
@@ -21,7 +22,4 @@ export const PlayerScore = styled.div`
   display: flex;
   justify-content: space-between;
   margin: .5rem .5rem 0 .5rem;
-  font-size: .8rem;
-
-
 `

@@ -11,6 +11,7 @@ const initialState = tetromino => ({
 
 export const usePlayer = () => {
   const tetromino = TETROMINOS[0].shape;
+  const [nextTetromino, setNextTetromino] = useState(tetromino);
   const [player, setPlayer] = useState(initialState(tetromino));
 
   const rotate = (tetromino, dir) => {
@@ -54,9 +55,12 @@ export const usePlayer = () => {
   };
 
   const resetPlayer = useCallback(() => {
-    const tetromino = randomTetromino().shape;
-    setPlayer(initialState(tetromino));
-  }, []);
+    // if we start have to start tetromino we generate a random tetromino
+    // otherwise we take the nextTetromino
+    const newTetromino = nextTetromino.length < 2 ? randomTetromino().shape : nextTetromino; 
+    setPlayer(initialState(newTetromino));
+    setNextTetromino(randomTetromino().shape)
+  }, [nextTetromino]);
 
-  return [player, updatePlayerPos, resetPlayer, playerRotate];
+  return [player, updatePlayerPos, resetPlayer, playerRotate, nextTetromino];
 };

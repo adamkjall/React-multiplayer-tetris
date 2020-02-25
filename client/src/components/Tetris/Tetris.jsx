@@ -14,6 +14,7 @@ import Display from "../Display/Display";
 import StartButton from "../StartButton/StartButton";
 import Highscore from "../Highscore/Highscore";
 import HighscoreModal from "../HighscoreModal/HighscoreModal";
+import NextTetrimino from "../NextTetrimino/NextTetrimino";
 
 // Styled components
 import { StyledTetrisWrapper, StyledTetris } from "./Tetris.styles";
@@ -36,7 +37,8 @@ const Tetris = ({
     player,
     updatePlayerPos,
     resetPlayer,
-    playerRotate
+    playerRotate,
+    nextTetromino
   ] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(
@@ -64,7 +66,7 @@ const Tetris = ({
     gameState.level,
     isLocalPlayer,
     setScore,
-    setRows,
+    setRows
   ]);
 
   useEffect(() => {
@@ -207,28 +209,34 @@ const Tetris = ({
       tabIndex="0"
       onKeyDown={keyDown}
       onKeyUp={keyUp}
+      nPlayers={nPlayers}
     >
       <StyledTetris>
+        <aside className="next-tetrimino">
+          {isLocalPlayer ? (
+            <>
+              <NextTetrimino tetrimino={nextTetromino} />
+              <Highscore highscoreArray={highscores} gameOver={gameOver} />
+            </>
+          ) : null}
+        </aside>
         <Stage
+          className="stage"
           stage={stage}
           gameOver={gameOver}
           isLocalPlayer={isLocalPlayer}
         />
         {showModal ? <HighscoreModal submitName={onSubmitHighscore} /> : null}
-        <aside>
-          <React.Fragment>
+        <aside className="information">
+          <>
             {gameOver ? <Display gameOver={gameOver} text="Game Over" /> : null}
-            <Display text={"Score: " + score} />
-            <Display text={"Rows: " + rows} />
-            <Display text={"Level: " + level} />
-
+            <Display text={"Score"} value={score} />
+            <Display text={"Rows"} value={rows} />
+            <Display text={"Level"} value={level} />
             {isLocalPlayer ? (
-              <React.Fragment>
-                <StartButton clickHandle={!showModal ? startGame : null} />
-                <Highscore highscoreArray={highscores} gameOver={gameOver} />
-              </React.Fragment>
+              <StartButton clickHandle={!showModal ? startGame : null} />
             ) : null}
-          </React.Fragment>
+          </>
         </aside>
       </StyledTetris>
     </StyledTetrisWrapper>

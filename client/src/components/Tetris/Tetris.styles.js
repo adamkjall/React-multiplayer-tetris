@@ -3,20 +3,11 @@ import styled from "styled-components";
 import bgImage from "../../assets/img/bg.png";
 
 export const StyledTetrisWrapper = styled.div`
-  /* width: 100vw; */
   height: 100%;
   width: 100%;
+  max-width: 850px;
   outline: none;
-  /* background: url(${bgImage}) #000; */
-  /* background: 
-    radial-gradient(100% 225% at 0% 0%, #DE3E3E 0%, #17115C 100%),
-    radial-gradient(100% 225% at 100% 0%, #FF9040 0%, #FF0000 100%), 
-    linear-gradient(180deg, #CE63B7 0%, #ED6283 100%), 
-    radial-gradient(100% 120% at 75% 0%, #A74600 0%, #000000 100%),
-    linear-gradient(310deg, #0063D8 0%, #16009A 50%);
-  background-blend-mode: overlay, color-dodge, color-burn, color-dodge, normal;
-  background-size: cover;
-  overflow: hidden; */
+  font-size: ${props => 1 - (props.nPlayers * 0.1)}rem;
 `;
 
 export const StyledTetris = styled.div`
@@ -25,12 +16,24 @@ export const StyledTetris = styled.div`
   justify-content: center;
   padding: 2.5rem 1rem;
   margin: 0 auto;
-  /* max-width: 900px; */
-  width: 100%;
+  min-width: 600px;
+  /* font-size: 0.8rem; */
 
-  aside {
-    width: 100%;
-    max-width: 200px;
+  .stage {
+    width: 40%;
+  }
+
+  .next-tetrimino {
+    width: 30%;
+    padding-right: 1.25rem;
+
+    > * {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .information {
+    width: 30%;
     display: block;
     padding: 0 1.25rem;
   }
