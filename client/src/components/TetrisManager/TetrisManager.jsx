@@ -23,7 +23,7 @@ class TetrisManager extends React.Component {
     this.createPlayer();
     this.connectionManager = new ConnectionManager(this);
     // this.connectionManager.connect("ws://localhost:3001");
-    this.connectionManager.connect("ws://react-tetris-api.herokuapp.com/");
+    this.connectionManager.connect("wss://react-tetris-api.herokuapp.com/");
   }
 
   connectToServer = () => {

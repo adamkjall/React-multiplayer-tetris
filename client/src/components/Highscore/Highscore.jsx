@@ -6,14 +6,15 @@ const Highscore = ({ highscoreArray }) => {
   return (
     <StyledHighscore>
       <h4 className="title">Highscore</h4>
-      {highscoreArray
+      {console.log(highscoreArray)}
+      {highscoreArray.length !== 0
         ? highscoreArray.sort((a, b) => b.score - a.score).map((highscore, i) => (
             <PlayerScore key={i}>
               <span className="name">{highscore.name}</span>
               <span className="score">{highscore.score}</span>
             </PlayerScore>
           ))
-        : null}
+        : <p>Loading...</p>}
     </StyledHighscore>
   );
 };
