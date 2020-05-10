@@ -1,8 +1,14 @@
 # React Multiplayer Tetris 
+Online multiplayer Tetris game made with React, Node.js, Express.js, Socket.IO and Firebase. 
 
 link: https://react-multiplayer-tetris.herokuapp.com/
 
-Online multiplayer Tetris game made with React, Node.js, Express.js, Socket.IO and Firebase. 
+
+# How to play
+Follow this link https://react-multiplayer-tetris.herokuapp.com/ and wait a minute while heroku starts up its server.
+When the game starts you get a unique url that identifies your game session,
+(e.g. "https://react-multiplayer-tetris.herokuapp.com/#hxt1wm"),
+if you share your url or open it up in a new window several tetris games should be in the same session. Happy playing!
 
 # Installation instructions
 Server: Start the server by running "npm start"
